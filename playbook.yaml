@@ -1,0 +1,35 @@
+- hosts: localhost
+  become: yes
+  tasks:
+
+    - name: install apache
+      ansible.builtin.package:
+        name: apache2
+        state: present
+
+    - name: get IP and store as a registered variable 
+      uri:
+        url: http://ifconfig.me/ip
+        return_content: yes
+      register: myIP
+
+    - name: delete index.html
+      ansible.builtin.file:
+        path: /var/www/html/index.html
+        state: absent 
+
+    - name: touch index.html and write
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <h1> {{  myIP.content  }} </h1>
+
+    - name: remove ansible description from file
+      ansible.builtin.lineinfile:
+        path: /var/www/html/index.html
+        state: absent 
+        regexp: '^.*#'
+          
+
+    
+     
